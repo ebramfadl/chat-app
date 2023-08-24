@@ -68,6 +68,13 @@ class WelcomeState extends State<Welcome> with SingleTickerProviderStateMixin{
               height: 48,
             ),
             RoundedButton(
+              title: 'Login',
+              color: Colors.blueAccent,
+              onPressed: (){
+                Navigator.pushNamed(context, Login.id);
+              },
+            ),
+            RoundedButton(
               title: 'Register',
               color: Colors.blueAccent,
               onPressed: (){
