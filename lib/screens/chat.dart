@@ -75,17 +75,21 @@ class ChatState extends State<Chat> {
                       decoration: kMessageTextFieldDecoration,
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      messageTextController.clear();
-                      firestore.collection('messages').add({
-                        'text': messageText,
-                        'sender': loggedInUser.email,
-                      });
-                    },
-                    child: Text(
-                      'Send',
-                      style: kSendButtonTextStyle,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        messageTextController.clear();
+                        firestore.collection('messages').add({
+                          'text': messageText,
+                          'sender': loggedInUser.email,
+                          'timestamp': FieldValue.serverTimestamp(),
+                        });
+                      },
+                      child: Text(
+                        'Send',
+                        style: kSendButtonTextStyle,
+                      ),
                     ),
                   ),
                 ],
@@ -102,7 +106,7 @@ class MessagesStream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: firestore.collection('messages').snapshots(),
+      stream: firestore.collection('messages').orderBy('timestamp',descending: false).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(
