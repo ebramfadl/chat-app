@@ -4,6 +4,8 @@ import 'package:chat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
+import 'chat.dart';
+
 class Registration extends StatefulWidget {
   static const String id = 'register';
 
@@ -36,7 +38,7 @@ class RegistrationState extends State<Registration> {
                   tag: 'logo',
                   child: Container(
                     height: 200,
-                    child: Image.asset('ímages/logo.png'),
+                    child: Image.asset('images/logo.png'),
                   ),
                 ),
               ),

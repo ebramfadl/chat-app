@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 final firestore = FirebaseFirestore.instance;
-FirebaseUser loggedInUser;
+late User loggedInUser;
 
 class Chat extends StatefulWidget {
   static const String id = 'chat';
@@ -114,8 +114,9 @@ class MessagesStream extends StatelessWidget {
         final messages = snapshot.data?.docs.reversed;
         List<MessageBubble> messageBubbles = [];
         for (var message in messages!) {
-          final messageText = message.data['text'];
-          final messageSender = message.data['sender'];
+          final messageData = message.data() as Map;
+          final messageText = messageData['text'];
+          final messageSender = messageData['sender'];
           final currentUser = loggedInUser.email;
           final messageBubble = MessageBubble(
             sender: messageSender,
