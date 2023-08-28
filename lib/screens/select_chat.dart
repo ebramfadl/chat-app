@@ -95,12 +95,10 @@ class SelectState extends State<Select> {
                   }
                 },
               ),
-              SizedBox(
-                height: 48,
-              ),
+
               RoundedButton(
                 title: 'Create new chat',
-                color: Colors.blueAccent,
+                color: Colors.lightBlueAccent,
                 onPressed: (){
                   Navigator.pushNamed(context, Create.id);
                 },
