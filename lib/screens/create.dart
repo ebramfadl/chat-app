@@ -1,22 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chat/components/rounded_button.dart';
 import 'package:chat/constants.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'chat.dart';
-import 'create.dart';
 
-class Select extends StatefulWidget {
-  static const String id = 'select';
+class Create extends StatefulWidget {
+  static const String id = 'create';
 
   @override
   State<StatefulWidget> createState() {
-    return SelectState();
+    return CreateState();
   }
 }
 
-class SelectState extends State<Select> {
+class CreateState extends State<Create> {
   bool showSpinner = false;
   late String chatId;
 
@@ -57,7 +56,7 @@ class SelectState extends State<Select> {
                 height: 24.0,
               ),
               RoundedButton(
-                title: 'Enter',
+                title: 'Create',
                 color: Colors.lightBlueAccent,
                 onPressed: () async {
                   setState(() {
@@ -65,44 +64,32 @@ class SelectState extends State<Select> {
                   });
                   final collectionRef = firestore.collection(chatId);
                   final snapshot = await collectionRef.get();
-                  if (snapshot.docs.isEmpty) {
+                  if (snapshot.docs.isNotEmpty) {
                     Alert(
                       context: context,
                       title: 'Ops!',
-                      desc: 'Chat does not exist!',
+                      desc: 'A chat exists already with the provided id!!',
                     ).show();
                     setState(() {
                       showSpinner = false;
                     });
                   }
-                  else {
-                    try{
-                      Navigator.pushNamed(context, Chat.id, arguments: chatId);
-                      setState(() {
-                        showSpinner = false;
+                  else{
+                    try {
+                      await FirebaseFirestore.instance.collection(chatId).add({
+                        'text': 'Welcome',
+                        'sender': 'Test',
+                        'timestamp': FieldValue.serverTimestamp(),
                       });
-
+                      Navigator.pushNamed(context, Chat.id, arguments: chatId);
                     } catch (e) {
                       Alert(
                         context: context,
                         title: 'Ops!',
                         desc: 'An error occured',
                       ).show();
-                      setState(() {
-                        showSpinner = false;
-                      });
                     }
                   }
-                },
-              ),
-              SizedBox(
-                height: 48,
-              ),
-              RoundedButton(
-                title: 'Create new chat',
-                color: Colors.blueAccent,
-                onPressed: (){
-                  Navigator.pushNamed(context, Create.id);
                 },
               ),
             ],

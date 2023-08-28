@@ -1,3 +1,4 @@
+import 'package:chat/screens/create.dart';
 import 'package:chat/screens/select_chat.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,8 @@ class FlashChat extends StatelessWidget {
         Login.id: (context) => Login(),
         Registration.id: (context) => Registration(),
         Chat.id: (context) => Chat(),
-        Select.id: (context) => Select()
+        Select.id: (context) => Select(),
+        Create.id: (context) => Create()
       },
     );
   }
