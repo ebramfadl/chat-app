@@ -1,4 +1,3 @@
-import 'package:chat/screens/select_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:chat/components/rounded_button.dart';
 import 'package:chat/constants.dart';
@@ -7,20 +6,18 @@ import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'chat.dart';
 
-class Login extends StatefulWidget {
-  static const String id = 'login';
+class Select extends StatefulWidget {
+  static const String id = 'select';
 
   @override
   State<StatefulWidget> createState() {
-    return LoginState();
+    return SelectState();
   }
 }
 
-class LoginState extends State<Login> {
+class SelectState extends State<Select> {
   bool showSpinner = false;
-  final auth = FirebaseAuth.instance;
-  late String email;
-  late String password;
+  late String chatId;
 
   @override
   Widget build(BuildContext context) {
@@ -47,55 +44,53 @@ class LoginState extends State<Login> {
                 height: 48.0,
               ),
               TextField(
-                keyboardType: TextInputType.emailAddress,
-                textAlign: TextAlign.center,
-                onChanged: (value) {
-                  email = value;
-                },
-                decoration:
-                    kTextFieldDecoration.copyWith(hintText: 'Enter your email'),
-              ),
-              SizedBox(
-                height: 8.0,
-              ),
-              TextField(
                 obscureText: true,
                 textAlign: TextAlign.center,
                 onChanged: (value) {
-                  password = value;
+                  chatId = value;
                 },
                 decoration: kTextFieldDecoration.copyWith(
-                    hintText: 'Enter your password'),
+                    hintText: 'Enter the chat ID'),
               ),
               SizedBox(
                 height: 24.0,
               ),
               RoundedButton(
-                title: 'Log In',
+                title: 'Enter',
                 color: Colors.lightBlueAccent,
                 onPressed: () async {
                   setState(() {
                     showSpinner = true;
                   });
-                  try {
-                    final user = await auth.signInWithEmailAndPassword(
-                        email: email, password: password);
-                    if (user != null) {
-                      Navigator.pushNamed(context, Select.id);
-                    }
-
-                    setState(() {
-                      showSpinner = false;
-                    });
-                  } catch (e) {
+                  final collectionRef = firestore.collection(chatId);
+                  final snapshot = await collectionRef.get();
+                  if (snapshot.docs.isEmpty) {
                     Alert(
                       context: context,
                       title: 'Ops!',
-                      desc: 'An error occured',
+                      desc: 'Chat does not exist!',
                     ).show();
                     setState(() {
                       showSpinner = false;
                     });
+                  }
+                  else {
+                    try{
+                      Navigator.pushNamed(context, Chat.id, arguments: chatId);
+                      setState(() {
+                        showSpinner = false;
+                      });
+
+                    } catch (e) {
+                      Alert(
+                        context: context,
+                        title: 'Ops!',
+                        desc: 'An error occured',
+                      ).show();
+                      setState(() {
+                        showSpinner = false;
+                      });
+                    }
                   }
                 },
               ),

@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 final firestore = FirebaseFirestore.instance;
 late User loggedInUser;
+late String chatId;
 
 class Chat extends StatefulWidget {
   static const String id = 'chat';
@@ -40,6 +41,7 @@ class ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+    chatId = ModalRoute.of(context)!.settings.arguments as String;
     return Scaffold(
       appBar: AppBar(
         leading: null,
@@ -80,7 +82,7 @@ class ChatState extends State<Chat> {
                     child: ElevatedButton(
                       onPressed: () {
                         messageTextController.clear();
-                        firestore.collection('messages').add({
+                        firestore.collection(chatId).add({
                           'text': messageText,
                           'sender': loggedInUser.email,
                           'timestamp': FieldValue.serverTimestamp(),
@@ -105,10 +107,11 @@ class ChatState extends State<Chat> {
 class MessagesStream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    chatId = ModalRoute.of(context)!.settings.arguments as String;
     return StreamBuilder<QuerySnapshot>(
-      stream: firestore.collection('messages').orderBy('timestamp',descending: false).snapshots(),
+      stream: firestore.collection(chatId).orderBy('timestamp',descending: false).snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData || snapshot.data?.docs.isEmpty == true) {
           return Center(
             child: CircularProgressIndicator(
               backgroundColor: Colors.lightBlueAccent,
