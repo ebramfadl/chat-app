@@ -1,8 +1,14 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:chat/notification_api.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:chat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart';
 
 final firestore = FirebaseFirestore.instance;
 late User loggedInUser;
@@ -22,11 +28,19 @@ class ChatState extends State<Chat> {
   final auth = FirebaseAuth.instance;
   late String messageText;
 
+
+
   @override
   void initState() {
     super.initState();
     getCurrentUser();
+
+    // NotificationApi.init();
+    // listenNotifications();
   }
+
+  // void listenNotifications() => NotificationApi.onNotifications.stream.listen(onClickedNotification);
+  // void onClickedNotification(String? payload) => Navigator.pushNamed(context, Chat.id, arguments: payload);
 
   void getCurrentUser() async {
     try {
@@ -41,6 +55,8 @@ class ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+
+    final message = ModalRoute.of(context)!.settings.arguments; // to access the notification message
     chatId = ModalRoute.of(context)!.settings.arguments as String;
     return Scaffold(
       appBar: AppBar(
@@ -87,6 +103,15 @@ class ChatState extends State<Chat> {
                           'sender': loggedInUser.email,
                           'timestamp': FieldValue.serverTimestamp(),
                         });
+                        // }).then((_) {
+                        //   // Send a notification after adding the message to Firestore
+                        //   NotificationApi.showNotification(
+                        //     title: 'New Message',
+                        //     body: '$messageText from ${loggedInUser.email}',
+                        //     payload: chatId,
+                        //     // Set other optional parameters if needed
+                        //   );
+                        // });
                       },
                       child: Text(
                         'Send',

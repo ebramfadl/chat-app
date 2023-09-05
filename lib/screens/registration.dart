@@ -1,3 +1,4 @@
+import 'package:chat/screens/select_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:chat/components/rounded_button.dart';
 import 'package:chat/constants.dart';
@@ -80,7 +81,7 @@ class RegistrationState extends State<Registration> {
                   try{
                     final newUser = await auth.createUserWithEmailAndPassword(email: email, password: password);
                     if(newUser != null){
-                      Navigator.pushNamed(context, Chat.id);
+                      Navigator.pushNamed(context, Select.id);
                     }
                     setState(() {
                       showSpinner = false;
