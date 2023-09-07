@@ -79,6 +79,7 @@ class CreateState extends State<Create> {
                       await FirebaseFirestore.instance.collection(chatId).add({
                         'text': 'Welcome',
                         'sender': 'Test',
+                        'type': 'text',
                         'timestamp': FieldValue.serverTimestamp(),
                       });
                       Navigator.pushNamed(context, Chat.id, arguments: chatId);

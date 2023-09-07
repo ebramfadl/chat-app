@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
+import 'package:image_picker/image_picker.dart';
 import 'package:chat/notification_api.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +9,8 @@ import 'package:chat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart';
+
+import '../api.dart';
 
 final firestore = FirebaseFirestore.instance;
 late User loggedInUser;
@@ -93,6 +95,37 @@ class ChatState extends State<Chat> {
                       decoration: kMessageTextFieldDecoration,
                     ),
                   ),
+
+                  //gallery image
+                  Expanded(
+                    child: IconButton(
+                      onPressed: () async{},
+                      icon: const Icon(
+                          Icons.image,
+                          color: Colors.blueAccent,
+                          size: 26,
+                      ),
+                    ),
+                  ),
+
+                  //camera image
+                  Expanded(
+                    child: IconButton(
+                      onPressed: () async{
+                        final ImagePicker picker = ImagePicker();
+                        final XFile? image = await picker.pickImage(
+                            source: ImageSource.camera, imageQuality: 70);
+                        if (image != null) {
+                          await Api.sendChatImage(File(image.path),chatId,loggedInUser);
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.camera_alt_rounded,
+                        color: Colors.blueAccent,
+                        size: 26,
+                      ),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ElevatedButton(
@@ -101,6 +134,7 @@ class ChatState extends State<Chat> {
                         firestore.collection(chatId).add({
                           'text': messageText,
                           'sender': loggedInUser.email,
+                          'type': 'text',
                           'timestamp': FieldValue.serverTimestamp(),
                         });
                         // }).then((_) {
@@ -149,10 +183,12 @@ class MessagesStream extends StatelessWidget {
           final messageData = message.data() as Map;
           final messageText = messageData['text'];
           final messageSender = messageData['sender'];
+          final messageType = messageData['type'];
           final currentUser = loggedInUser.email;
           final messageBubble = MessageBubble(
             sender: messageSender,
             text: messageText,
+            type: messageType,
             isMe: currentUser == messageSender,
           );
           messageBubbles.add(messageBubble);
@@ -170,10 +206,11 @@ class MessagesStream extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  MessageBubble({required this.sender, required this.text, required this.isMe});
+  MessageBubble({required this.sender, required this.text, required this.isMe, required this.type});
 
   final String sender;
   final String text;
+  final String type;
   final bool isMe;
 
   @override
@@ -206,13 +243,13 @@ class MessageBubble extends StatelessWidget {
             color: isMe ? Colors.lightBlueAccent : Colors.white,
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
-              child: Text(
+              child: type == 'text'? Text(
                 text,
                 style: TextStyle(
                   color: isMe ? Colors.white : Colors.black54,
                   fontSize: 15,
                 ),
-              ),
+              ):Image.network(text),
             ),
           ),
         ],

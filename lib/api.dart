@@ -1,7 +1,11 @@
 import 'dart:convert';
-
+import 'dart:io';
+import 'dart:math';
+import 'package:chat/screens/chat.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async{
@@ -13,6 +17,7 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async{
 class Api{
 
   final firebaseMessaging = FirebaseMessaging.instance;
+  static FirebaseStorage storage = FirebaseStorage.instance;
 
   final androidChannel = const AndroidNotificationChannel(
     'high_importance_channel',
@@ -80,5 +85,31 @@ class Api{
     print('Token : $fcmToken');
     initPushNotifications();
     initLocalNotifications();
+  }
+
+  static Future<void> sendChatImage(File file,String chatId,User user) async{
+
+    //getting image file extension
+    final ext = file.path.split('.').last;
+
+    //storage file ref with path
+    final ref = storage.ref().child('images/${chatId}/${DateTime.now().millisecondsSinceEpoch}.$ext');
+
+    //uploading image
+    await ref
+        .putFile(file, SettableMetadata(contentType: 'image/$ext'))
+        .then((p0) {
+      print('Data Transferred: ${p0.bytesTransferred / 1000} kb');
+    });
+
+    //updating image in firestore database
+    final imageUrl = await ref.getDownloadURL();
+    await firestore.collection(chatId).add({
+      'sender': user.email,
+      'text': imageUrl,
+      'type': 'image',
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
   }
 }
