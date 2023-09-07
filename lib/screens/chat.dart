@@ -99,7 +99,16 @@ class ChatState extends State<Chat> {
                   //gallery image
                   Expanded(
                     child: IconButton(
-                      onPressed: () async{},
+                      onPressed: () async{
+                        final ImagePicker picker = ImagePicker();
+                        // Picking multiple images
+                        final List<XFile> images =
+                        await picker.pickMultiImage(imageQuality: 70);
+                        // uploading & sending image one by one
+                        for (var i in images) {
+                          await Api.sendChatImage(File(i.path),chatId,loggedInUser);
+                        }
+                      },
                       icon: const Icon(
                           Icons.image,
                           color: Colors.blueAccent,
