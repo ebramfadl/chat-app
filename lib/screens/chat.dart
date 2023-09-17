@@ -1,18 +1,15 @@
-import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:chat/notification_api.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:chat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart';
 
 import '../api.dart';
 
 final firestore = FirebaseFirestore.instance;
+final firebaseMessaging = FirebaseMessaging.instance;
 late User loggedInUser;
 late String chatId;
 
@@ -31,15 +28,54 @@ class ChatState extends State<Chat> {
   late String messageText;
 
 
+  void setupPushNotifications() async {
+    final fcm = FirebaseMessaging.instance;
+
+    await fcm.requestPermission();
+
+    fcm.subscribeToTopic(chatId);
+  }
 
   @override
   void initState() {
     super.initState();
     getCurrentUser();
-
-    // NotificationApi.init();
-    // listenNotifications();
+    setupPushNotifications();
   }
+
+  // void initFirebaseMessaging() {
+  //   firebaseMessaging.subscribeToTopic('chat_$chatId'); // Subscribe to a topic based on your chat room or chat ID
+  //
+  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //     print("onMessage: $message");
+  //     // Handle the notification when the app is in the foreground
+  //     // You can show a local notification or update your UI here
+  //   });
+  //
+  //   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+  //     print("onMessageOpenedApp: $message");
+  //     // Handle the notification when the app is in the background and is opened by tapping the notification
+  //     // You can navigate to the chat screen with the provided chatId
+  //     final payloadChatId = message.data['chatId'];
+  //     if (payloadChatId != null) {
+  //       Navigator.pushNamed(context, Chat.id, arguments: payloadChatId);
+  //     }
+  //   });
+  //
+  //   // Optional: Handle background messages using onBackgroundMessage
+  //   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+  // }
+  //
+  // Future<void> handleBackgroundMessage(RemoteMessage message) async {
+  //   print("Handling background message: $message");
+  //   // Handle the notification when the app is terminated or in the background
+  //   // You can navigate to the chat screen with the provided chatId
+  //   final payloadChatId = message.data['chatId'];
+  //   if (payloadChatId != null) {
+  //     Navigator.pushNamed(context, Chat.id, arguments: payloadChatId);
+  //   }
+  // }
+
 
   // void listenNotifications() => NotificationApi.onNotifications.stream.listen(onClickedNotification);
   // void onClickedNotification(String? payload) => Navigator.pushNamed(context, Chat.id, arguments: payload);
